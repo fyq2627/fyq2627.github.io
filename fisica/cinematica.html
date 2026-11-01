@@ -1,0 +1,375 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>:root{color-scheme:light}body{margin:0;font-size:14px}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Laboratorio de cinemática</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* Layout: escena animada arriba con cronómetro a su lado, tabla de la ficha debajo; pestañas para Práctica 1 y 2 */
+:root{
+  --bg:#edf1f3; --surface:#ffffff; --ink:#15212b; --muted:#566878; --line:#c8d4dc;
+  --accent:#1d4fd0; --accent-ink:#ffffff; --car:#e0661f; --track:#d9e1e6; --wood:#c9a46f; --book1:#7b4ea3; --book2:#2f8f7a; --book3:#c0453f;
+  --lcd:#c3d3ad; --lcd-ink:#1a2810; --good:#2b7a4b; --soft:#e4edf2; --warn-bg:#fbeee5;
+  --f-display:"Bricolage Grotesque","Segoe UI",system-ui,sans-serif;
+  --f-body:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0e161c; --surface:#16222a; --ink:#e3ebf0; --muted:#93a5b3; --line:#2b3a45;
+  --accent:#7ea3ff; --accent-ink:#0b1220; --car:#f08a46; --track:#22313b; --wood:#8f7046; --book1:#9b74c4; --book2:#4cb39b; --book3:#e0716b;
+  --lcd:#9fb187; --lcd-ink:#15200c; --good:#6fcf97; --soft:#1c2b35; --warn-bg:#2d2119; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0e161c; --surface:#16222a; --ink:#e3ebf0; --muted:#93a5b3; --line:#2b3a45;
+  --accent:#7ea3ff; --accent-ink:#0b1220; --car:#f08a46; --track:#22313b; --wood:#8f7046; --book1:#9b74c4; --book2:#4cb39b; --book3:#e0716b;
+  --lcd:#9fb187; --lcd-ink:#15200c; --good:#6fcf97; --soft:#1c2b35; --warn-bg:#2d2119; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5}
+.wrap{max-width:1180px;margin:0 auto;padding-block:20px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:16px}
+header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px}
+.eyebrow{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700}
+h1{font-family:var(--f-display);font-weight:800;font-size:clamp(26px,4vw,38px);line-height:1.05;margin:2px 0 0;text-wrap:balance}
+h2{font-family:var(--f-display);font-weight:600;font-size:18px;margin:0;text-wrap:balance}
+.group{display:flex;align-items:center;gap:8px}
+.group label{font-weight:700;font-size:13px;color:var(--muted)}
+input[type=text]{font:inherit;padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);width:150px}
+button,select{font:inherit;cursor:pointer;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:8px 12px;font-weight:700}
+button:hover:not(:disabled){border-color:var(--accent)}
+button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+button:disabled{opacity:.42;cursor:not-allowed}
+.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
+.tab{padding:10px 16px;text-align:left}
+.tab small{display:block;font-weight:400;color:var(--muted);font-size:12px}
+.tab[aria-selected=true]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.tab[aria-selected=true] small{color:var(--bg);opacity:.75}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.lab{display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:16px;align-items:start}
+@media (max-width:860px){.lab{grid-template-columns:1fr}}
+.scene{background:var(--soft);border-radius:10px;overflow:hidden}
+.scene svg{display:block;width:100%;height:auto}
+.ctrls{display:flex;flex-wrap:wrap;gap:14px 20px;align-items:flex-end}
+.ctrl{display:flex;flex-direction:column;gap:4px;min-width:0}
+.ctrl>span{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.seg{display:flex;flex-wrap:wrap;gap:4px}
+.seg button{padding:6px 10px;font-family:var(--f-mono);font-weight:500}
+.seg button[aria-pressed=true]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.rng{display:flex;align-items:center;gap:8px}
+.rng input{width:150px;accent-color:var(--accent)}
+.rng output{font-family:var(--f-mono);font-size:14px;min-width:78px}
+.watch{display:flex;flex-direction:column;gap:10px;align-items:stretch}
+.lcd{background:var(--lcd);color:var(--lcd-ink);font-family:var(--f-mono);font-weight:700;font-size:44px;padding:8px 16px;border-radius:8px;text-align:right;font-variant-numeric:tabular-nums;box-shadow:inset 0 2px 6px rgba(0,0,0,.25)}
+.lcd span{font-size:20px;margin-left:6px}
+.big{font-size:20px;padding:16px;border-radius:12px;touch-action:manipulation;user-select:none}
+.big.running{background:var(--book3);border-color:var(--book3);color:#fff}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.msg{padding:10px 12px;border-radius:8px;background:var(--soft);font-size:14px;min-height:44px}
+.msg.warn{background:var(--warn-bg)}
+.check{display:flex;gap:8px;align-items:flex-start;font-size:14px;cursor:pointer}
+.check input{margin-top:3px;accent-color:var(--accent)}
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between}
+.btnrow{display:flex;flex-wrap:wrap;gap:8px}
+.tablewrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:620px;font-variant-numeric:tabular-nums}
+th,td{border:1px solid var(--line);padding:7px 9px;text-align:center}
+thead th{font-family:var(--f-display);font-weight:600;background:var(--soft);font-size:14px}
+tbody th{font-family:var(--f-mono);font-weight:700}
+td{font-family:var(--f-mono);font-size:15px;white-space:nowrap}
+td.calc{background:var(--bg)}
+.hc{color:var(--muted);font-family:var(--f-body);font-size:13px}
+tr.sel th,tr.sel td.t{box-shadow:inset 0 0 0 2px var(--accent)}
+td .del{border:none;background:none;padding:0 0 0 4px;color:var(--muted);font-size:13px}
+.note{font-size:13px;color:var(--muted);margin:0}
+.sum{font-size:15px}
+.graph svg{width:100%;height:auto;display:block;max-width:640px}
+details{border-top:1px solid var(--line);padding-top:10px}
+summary{cursor:pointer;font-weight:700}
+.opts{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+.idea{background:var(--soft);border-radius:10px;padding:10px 14px;font-size:14px}
+.idea b{font-family:var(--f-mono)}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+<header>
+  <div>
+    <div class="eyebrow">Física y Química · Cinemática</div>
+    <h1>Laboratorio de cinemática</h1>
+  </div>
+  <div class="group"><label for="grp">Grupo</label><input type="text" id="grp" placeholder="p. ej. 3B-equipo2" autocomplete="off"></div>
+</header>
+
+<div class="tabs" role="tablist">
+  <button class="tab" role="tab" id="tab1" aria-selected="true">Práctica 1 · MRU<small>Coche sobre la mesa</small></button>
+  <button class="tab" role="tab" id="tab2" aria-selected="false">Práctica 2 · MRUA<small>Bola en plano inclinado</small></button>
+</div>
+
+<section class="panel">
+  <h2 id="objTxt"></h2>
+  <div class="lab">
+    <div style="display:flex;flex-direction:column;gap:14px;min-width:0">
+      <div class="scene" id="scene"></div>
+      <div class="ctrls" id="ctrls"></div>
+    </div>
+    <div class="watch">
+      <div class="lcd" id="lcd" aria-live="off">0,00<span>s</span></div>
+      <button class="big" id="swBtn">Iniciar cronómetro</button>
+      <div class="row2">
+        <button class="primary" id="goBtn">Soltar coche</button>
+        <button id="noteBtn" class="primary">Anotar tiempo</button>
+      </div>
+      <button id="resetBtn">Reiniciar intento</button>
+      <label class="check"><input type="checkbox" id="autoChk"> Cronometraje automático (con pequeño error humano)</label>
+      <div class="msg" id="msg" aria-live="polite"></div>
+    </div>
+  </div>
+</section>
+
+<section class="panel" id="resPanel"></section>
+
+<section class="panel">
+  <details>
+    <summary>Opciones del profesor</summary>
+    <div class="opts">
+      <label class="check"><input type="checkbox" id="o_calc"> Mostrar tiempos medios, velocidades, aceleraciones y gráficas</label>
+      <p class="note">Por defecto los alumnos solo ven sus tiempos y calculan el resto en la ficha. Cada código de grupo da un coche con una velocidad distinta. Los datos se guardan solo en este navegador.</p>
+    </div>
+  </details>
+</section>
+</div>
+
+<script>
+(function(){
+const $=id=>document.getElementById(id);
+const fmt=(v,d=2)=>(isFinite(v)?v.toFixed(d).replace('.',','):'—');
+const gauss=()=>{let u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v)};
+function hash(s){let h=2166136261;for(const c of s)h=Math.imul(h^c.charCodeAt(0),16777619);return h>>>0}
+const G=981;
+const MRU_S=[20,40,60,80,100], MRUA_S=[20,40,60,80];
+const COL={1:'var(--book1)',2:'var(--book2)',3:'var(--book3)'};
+
+let S={tab:1,group:'',calc:false,auto:false,slow:1,
+  speed:30, target1:20, obj:'bola', grosor:3.5, books:1, target2:20,
+  d:{p1:{},p2a:{},p2b:{2:[],3:[]}}};
+MRU_S.forEach(s=>S.d.p1[s]=[]);MRUA_S.forEach(s=>S.d.p2a[s]=[]);
+let R={}; // intento en curso
+let raf=0,last=0;
+
+/* ---------- guardar ---------- */
+const key=()=>'cine:'+(S.group||'_');
+function save(){try{localStorage.setItem(key(),JSON.stringify({d:S.d,speed:S.speed,grosor:S.grosor,obj:S.obj}))}catch(e){}}
+function load(){
+  S.d={p1:{},p2a:{},p2b:{2:[],3:[]}};MRU_S.forEach(s=>S.d.p1[s]=[]);MRUA_S.forEach(s=>S.d.p2a[s]=[]);
+  S.speed=20+hash(S.group||'_')%26;S.grosor=3.5;S.obj='bola';
+  try{const j=JSON.parse(localStorage.getItem(key())||'null');if(j){Object.assign(S.d.p1,j.d.p1);Object.assign(S.d.p2a,j.d.p2a);Object.assign(S.d.p2b,j.d.p2b);S.speed=j.speed||S.speed;S.grosor=j.grosor||3.5;S.obj=j.obj||'bola'}}catch(e){}
+}
+function msg(t,warn){$('msg').textContent=t;$('msg').className='msg'+(warn?' warn':'')}
+
+/* ---------- física ---------- */
+const h=()=>S.books*S.grosor;
+function accel(){const sin=h()/100;return S.obj==='bola'?5/7*G*Math.max(0,sin-0.002):G*Math.max(0,sin-0.006)*0.97}
+
+/* ---------- intento ---------- */
+function newRun(){
+  cancelAnimationFrame(raf);raf=0;
+  R={phase:'ready',simT:0,pos:S.tab===1?-30:0,sw:0,swOn:false,swStart:0,stopped:false,
+     v:S.speed*(1+gauss()*0.025), a:accel()*(1+gauss()*0.015), autoStart:null,autoStop:null};
+  render();
+}
+function target(){return S.tab===1?S.target1:(S.books===1?S.target2:80)}
+function go(){
+  if(R.phase!=='ready')return;
+  R.phase='moving';R.simT=0;
+  if(S.tab===1){
+    const t0=30/R.v;
+    if(S.auto){R.autoStart=t0+gauss()*0.05;R.autoStop=t0+target()/R.v+gauss()*0.05}
+  }else{
+    startSW(); // al soltar la bola se pone en marcha el cronómetro
+    if(S.auto)R.autoStop=Math.sqrt(2*target()/R.a)+gauss()*0.05;
+  }
+  last=performance.now();raf=requestAnimationFrame(loop);render();
+}
+function startSW(){R.swOn=true;R.swStart=R.simT;R.sw=0}
+function stopSW(){R.swOn=false;R.sw=R.simT-R.swStart;R.stopped=true}
+function toggleSW(){
+  if(S.auto)return;
+  if(R.stopped)return;
+  if(!R.swOn){if(R.phase!=='moving'&&S.tab===1){msg('Primero suelta el coche y pon en marcha el cronómetro cuando pase por la marca 0.',true);return}
+    if(S.tab===2){msg('En esta práctica el cronómetro arranca solo al soltar la bola.',true);return}
+    startSW();}
+  else stopSW();
+  render();
+}
+function loop(now){
+  const dt=Math.min(.05,(now-last)/1000)*S.slow;last=now;R.simT+=dt;
+  if(S.tab===1)R.pos=-30+R.v*R.simT;else R.pos=Math.min(100,0.5*R.a*R.simT*R.simT);
+  if(S.auto){
+    if(R.autoStart!==null&&!R.swOn&&!R.stopped&&R.simT>=R.autoStart){R.swOn=true;R.swStart=R.autoStart}
+    if(R.autoStop!==null&&R.swOn&&R.simT>=R.autoStop){R.swOn=false;R.sw=R.autoStop-R.swStart;R.stopped=true;render()}
+  }
+  if(R.swOn)R.sw=R.simT-R.swStart;
+  const end=S.tab===1?R.pos>130:R.pos>=100;
+  if(end&&R.phase==='moving'){R.phase='done';render()}
+  draw();updLCD();
+  if(R.swOn||R.phase==='moving')raf=requestAnimationFrame(loop);else{raf=0;render()}
+}
+function note(){
+  if(!R.stopped){msg('Para el cronómetro antes de anotar.',true);return}
+  const t=Math.round(R.sw*100)/100;
+  let arr,where;
+  if(S.tab===1){arr=S.d.p1[S.target1];where=`fila ${S.target1} cm`}
+  else if(S.books===1){arr=S.d.p2a[S.target2];where=`tabla A, tramo ${S.target2} cm`}
+  else{arr=S.d.p2b[S.books];where=`tabla B, ${S.books} libros`}
+  if(arr.length>=3){msg(`Ya hay 3 tiempos en ${where}. Borra uno (×) para repetirlo o elige otra marca.`,true);return}
+  arr.push(t);save();
+  const n=arr.length;
+  newRun();
+  msg(`${fmt(t)} s anotado en ${where} (t${n}).`+(n<3?' Repite la medida.':' Fila completa: cambia de marca.'));
+}
+
+/* ---------- dibujo ---------- */
+const X1=cm=>40+(cm+35)*4.4;
+function sceneMRU(){
+  let s=`<svg viewBox="0 0 800 180" role="img" aria-label="Coche sobre la mesa con marcas cada 20 cm"><rect x="0" y="118" width="800" height="62" fill="var(--wood)" opacity=".55"/><line x1="0" y1="118" x2="800" y2="118" stroke="var(--ink)" stroke-width="2"/>`;
+  for(let c=-30;c<=120;c+=10)s+=`<line x1="${X1(c)}" y1="118" x2="${X1(c)}" y2="${c%20===0&&c>=0?140:126}" stroke="var(--ink)" stroke-width="1"/>`;
+  MRU_S.concat(0).forEach(c=>{const tg=c===S.target1;s+=`<rect x="${X1(c)-3}" y="112" width="6" height="12" fill="${tg?'var(--accent)':'var(--ink)'}"/><text x="${X1(c)}" y="160" text-anchor="middle" font-family="var(--f-mono)" font-size="14" font-weight="${tg||c===0?700:500}" fill="${tg?'var(--accent)':'var(--ink)'}">${c} cm</text>`});
+  s+=`<text x="${X1(-30)}" y="160" text-anchor="middle" font-size="12" fill="var(--muted)">salida</text>`;
+  s+=`<g id="car"><rect x="-56" y="-34" width="56" height="20" rx="6" fill="var(--car)"/><path d="M-44 -34 L-38 -48 L-16 -48 L-8 -34 Z" fill="var(--car)" opacity=".8"/><rect x="-36" y="-45" width="9" height="9" fill="var(--soft)"/><rect x="-24" y="-45" width="11" height="9" fill="var(--soft)"/><circle cx="-44" cy="-12" r="8" fill="var(--ink)"/><circle cx="-12" cy="-12" r="8" fill="var(--ink)"/><line x1="0" y1="-50" x2="0" y2="-4" stroke="var(--accent)" stroke-width="1.5" stroke-dasharray="3 3"/></g>`;
+  return s+`<text x="790" y="22" text-anchor="end" font-size="12" fill="var(--muted)">La línea discontinua marca la parte delantera del coche</text></svg>`;
+}
+function geo2(){const vis=Math.min(26,Math.atan(h()/100)*180/Math.PI*3.2)*Math.PI/180,L=640,ex=750,ey=268;return{vis,L,ex,ey,sx:ex-L*Math.cos(vis),sy:ey-L*Math.sin(vis)}}
+function P2(s,g,off=0){const t=s/100;return[g.sx+(g.ex-g.sx)*t-Math.sin(g.vis)*off,g.sy+(g.ey-g.sy)*t-Math.cos(g.vis)*off]}
+function sceneMRUA(){
+  const g=geo2();let s=`<svg viewBox="0 0 800 290" role="img" aria-label="Plano inclinado apoyado en ${S.books} libro(s)"><line x1="0" y1="${g.ey+8}" x2="800" y2="${g.ey+8}" stroke="var(--ink)" stroke-width="2"/>`;
+  const bh=(g.ey+8-g.sy)/S.books;
+  for(let i=0;i<S.books;i++)s+=`<rect x="${g.sx-40}" y="${g.ey+8-bh*(i+1)}" width="70" height="${bh-1}" rx="2" fill="${COL[i+1]}"/>`;
+  s+=`<line x1="${g.sx}" y1="${g.sy}" x2="${g.ex}" y2="${g.ey}" stroke="var(--wood)" stroke-width="12" stroke-linecap="round"/>`;
+  const tg=target();
+  [0].concat(MRUA_S).forEach(c=>{const[a,b]=P2(c,g,6),[a2,b2]=P2(c,g,-14),t=c===tg;s+=`<line x1="${a}" y1="${b}" x2="${a2}" y2="${b2}" stroke="${t?'var(--accent)':'var(--ink)'}" stroke-width="${t?3:1.5}"/><text x="${a2+4}" y="${b2+16}" font-family="var(--f-mono)" font-size="13" font-weight="${t?700:500}" fill="${t?'var(--accent)':'var(--ink)'}">${c===0?'salida':c+' cm'}</text>`});
+  s+=`<circle id="ball" r="12" fill="var(--car)" stroke="var(--ink)" stroke-width="1.5"/>`;
+  s+=`<text x="${g.sx-5}" y="${g.ey+26}" text-anchor="middle" font-size="12" fill="var(--muted)">h = ${fmt(h(),1)} cm</text>`;
+  return s+`<text x="790" y="22" text-anchor="end" font-size="12" fill="var(--muted)">Inclinación exagerada en el dibujo para que se vea</text></svg>`;
+}
+function draw(){
+  if(S.tab===1){const c=$('car');if(c)c.setAttribute('transform',`translate(${X1(R.pos)} 118)`)}
+  else{const b=$('ball');if(b){const[x,y]=P2(R.pos,geo2(),18);b.setAttribute('cx',x);b.setAttribute('cy',y)}}
+}
+function updLCD(){$('lcd').innerHTML=fmt(R.sw)+'<span>s</span>'}
+
+/* ---------- controles ---------- */
+function seg(id,vals,cur,lab){return `<div class="seg" id="${id}" role="group" aria-label="${lab}">`+vals.map(v=>`<button data-v="${v}" aria-pressed="${v==cur}">${v}</button>`).join('')+'</div>'}
+function renderCtrls(){
+  let c='';
+  if(S.tab===1){
+    c+=`<div class="ctrl"><span>Marca a cronometrar (cm)</span>${seg('tg1',MRU_S,S.target1,'Marca')}</div>`;
+    c+=`<div class="ctrl"><span>Velocidad del coche</span><div class="rng"><input type="range" id="spd" min="10" max="60" step="1" value="${S.speed}"><output id="spdO">${S.speed} cm/s aprox.</output></div></div>`;
+  }else{
+    c+=`<div class="ctrl"><span>Libros</span>${seg('bk',[1,2,3],S.books,'Libros')}</div>`;
+    c+=`<div class="ctrl"><span>Tramo (cm)</span>${S.books===1?seg('tg2',MRUA_S,S.target2,'Tramo'):'<div class="seg"><button aria-pressed="true" disabled>80</button></div>'}</div>`;
+    c+=`<div class="ctrl"><span>Grosor de cada libro</span><div class="rng"><input type="range" id="gr" min="1.5" max="6" step="0.5" value="${S.grosor}"><output>${fmt(S.grosor,1)} cm</output></div></div>`;
+    c+=`<div class="ctrl"><span>Objeto</span><select id="obj"><option value="bola"${S.obj==='bola'?' selected':''}>Bola o canica</option><option value="coche"${S.obj==='coche'?' selected':''}>Coche de juguete</option></select></div>`;
+  }
+  c+=`<div class="ctrl"><span>Cámara lenta</span>${seg('sl',['×1','×½','×¼'],S.slow===1?'×1':S.slow===.5?'×½':'×¼','Velocidad de la animación')}</div>`;
+  $('ctrls').innerHTML=c;
+  const bind=(id,f)=>{const el=$(id);if(el)el.querySelectorAll('button').forEach(b=>b.onclick=()=>f(b.dataset.v))};
+  bind('tg1',v=>{S.target1=+v;newRun()});
+  bind('tg2',v=>{S.target2=+v;newRun()});
+  bind('bk',v=>{S.books=+v;newRun();if(S.books>1)msg(`Parte B: ${S.books} libros, solo el tramo de 80 cm. Los tiempos van a la tabla B.`)});
+  bind('sl',v=>{S.slow=v==='×1'?1:v==='×½'?.5:.25;renderCtrls()});
+  if($('spd'))$('spd').oninput=e=>{S.speed=+e.target.value;$('spdO').textContent=S.speed+' cm/s aprox.';save();if(R.phase==='ready')R.v=S.speed*(1+gauss()*0.025)};
+  if($('spd'))$('spd').onchange=()=>msg('Has cambiado el coche: si ya tenías tiempos, empieza una tabla nueva para que sean comparables.',true);
+  if($('gr'))$('gr').oninput=e=>{S.grosor=+e.target.value;save();newRun()};
+  if($('obj'))$('obj').onchange=e=>{S.obj=e.target.value;save();newRun()};
+}
+
+/* ---------- resultados ---------- */
+const mean=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:NaN;
+function cells(arr,kind,k){let o='';for(let i=0;i<3;i++)o+=`<td class="t">${arr[i]!==undefined?fmt(arr[i])+`<button class="del" data-kind="${kind}" data-k="${k}" data-i="${i}" aria-label="Borrar t${i+1}">×</button>`:''}</td>`;return o}
+const calc=(v,d=2,u='')=>S.calc?`<td class="calc">${isFinite(v)?fmt(v,d)+u:'—'}</td>`:'<td class="calc hc">calcúlalo</td>';
+function graph(pts,xl,yl,unitY,fitOrigin){
+  if(!pts.length)return '<p class="note">La gráfica aparecerá cuando haya tiempos anotados.</p>';
+  const W=600,H=320,l=60,r=20,t=20,b=50;
+  const xmax=Math.max(...pts.map(p=>p[0]))*1.15||1,ymax=Math.max(...pts.map(p=>p[1]))*1.15||1;
+  const nice=m=>{const p=Math.pow(10,Math.floor(Math.log10(m/5)));const s=[1,2,5,10].map(k=>k*p).find(s=>m/s<=6);return s};
+  const sx=nice(xmax),sy=nice(ymax),X=v=>l+v/(Math.ceil(xmax/sx)*sx)*(W-l-r),Y=v=>H-b-v/(Math.ceil(ymax/sy)*sy)*(H-t-b);
+  let s=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Gráfica ${yl}–${xl}">`;
+  for(let v=0;v<=Math.ceil(xmax/sx)*sx+1e-9;v+=sx)s+=`<line x1="${X(v)}" y1="${t}" x2="${X(v)}" y2="${H-b}" stroke="var(--line)"/><text x="${X(v)}" y="${H-b+18}" text-anchor="middle" font-size="12" font-family="var(--f-mono)" fill="var(--muted)">${fmt(v,sx<1?1:0)}</text>`;
+  for(let v=0;v<=Math.ceil(ymax/sy)*sy+1e-9;v+=sy)s+=`<line x1="${l}" y1="${Y(v)}" x2="${W-r}" y2="${Y(v)}" stroke="var(--line)"/><text x="${l-8}" y="${Y(v)+4}" text-anchor="end" font-size="12" font-family="var(--f-mono)" fill="var(--muted)">${fmt(v,0)}</text>`;
+  s+=`<text x="${(W+l)/2}" y="${H-8}" text-anchor="middle" font-size="13" fill="var(--ink)">${xl}</text><text x="16" y="${(H-b+t)/2}" text-anchor="middle" font-size="13" fill="var(--ink)" transform="rotate(-90 16 ${(H-b+t)/2})">${yl}</text>`;
+  const k=pts.reduce((a,p)=>a+p[0]*p[1],0)/pts.reduce((a,p)=>a+p[0]*p[0],0);
+  const xe=Math.ceil(xmax/sx)*sx,ye=Math.min(k*xe,Math.ceil(ymax/sy)*sy);
+  s+=`<line x1="${X(0)}" y1="${Y(0)}" x2="${X(ye/k)}" y2="${Y(ye)}" stroke="var(--accent)" stroke-width="2"/>`;
+  [[0,0]].concat(pts).forEach(p=>s+=`<circle cx="${X(p[0])}" cy="${Y(p[1])}" r="5" fill="var(--car)" stroke="var(--ink)"/>`);
+  s+=`<text x="${W-r}" y="${t+14}" text-anchor="end" font-size="13" font-weight="700" fill="var(--accent)">pendiente ≈ ${fmt(k,1)} ${unitY}</text></svg>`;
+  return `<div class="graph">${s}</div>`;
+}
+function renderResults(){
+  let o='';
+  if(S.tab===1){
+    o+=`<div class="toolbar"><h2>Tabla de registro · MRU</h2><div class="btnrow"><button id="copyBtn">Copiar datos</button><button id="clrBtn">Borrar tabla</button></div></div>`;
+    o+=`<div class="tablewrap"><table><thead><tr><th>Distancia, s (cm)</th><th>t₁ (s)</th><th>t₂ (s)</th><th>t₃ (s)</th><th>t medio (s)</th><th>v = s / t medio (cm/s)</th></tr></thead><tbody>`;
+    const vs=[],pts=[];
+    MRU_S.forEach(s=>{const a=S.d.p1[s],tm=mean(a),v=s/tm;if(isFinite(v)){vs.push(v);pts.push([tm,s])}o+=`<tr class="${s===S.target1?'sel':''}"><th>${s}</th>${cells(a,'p1',s)}${calc(tm)}${calc(v,1)}</tr>`});
+    o+=`</tbody></table></div><p class="sum"><b>Velocidad media de todas las filas:</b> ${S.calc?fmt(mean(vs),1)+' cm/s':'<span class="hc">calcúlala tú</span>'}</p>`;
+    if(S.calc)o+=`<h2>Gráfica distancia–tiempo (s–t)</h2>`+graph(pts,'tiempo, t medio (s)','distancia, s (cm)','cm/s');
+  }else{
+    o+=`<div class="idea">Si parte del reposo: <b>v = 2·s / t</b> (velocidad al llegar a la marca) y <b>a = v / t = 2·s / t²</b>. Ojo: s / t es la velocidad media del tramo.</div>`;
+    o+=`<div class="toolbar"><h2>Tabla A · altura h = ${fmt(S.grosor,1)} cm (1 libro)</h2><div class="btnrow"><button id="copyBtn">Copiar datos</button><button id="clrBtn">Borrar tablas</button></div></div>`;
+    o+=`<div class="tablewrap"><table><thead><tr><th>Tramo, s (cm)</th><th>t₁ (s)</th><th>t₂ (s)</th><th>t₃ (s)</th><th>t medio (s)</th><th>v = 2s / t (cm/s)</th><th>a = v / t (cm/s²)</th></tr></thead><tbody>`;
+    const as=[],pts=[];
+    MRUA_S.forEach(s=>{const a=S.d.p2a[s],tm=mean(a),v=2*s/tm,ac=v/tm;if(isFinite(ac)){as.push(ac);pts.push([tm,v])}o+=`<tr class="${S.books===1&&s===S.target2?'sel':''}"><th>${s}</th>${cells(a,'p2a',s)}${calc(tm)}${calc(v,1)}${calc(ac,1)}</tr>`});
+    o+=`</tbody></table></div><p class="sum"><b>Aceleración media:</b> ${S.calc?fmt(mean(as),1)+' cm/s²':'<span class="hc">calcúlala tú</span>'}</p>`;
+    o+=`<h2>Tabla B · varias inclinaciones (s = 80 cm)</h2><div class="tablewrap"><table><thead><tr><th>Nº de libros</th><th>Altura h (cm)</th><th>t₁ (s)</th><th>t₂ (s)</th><th>t₃ (s)</th><th>t medio (s)</th><th>a = 2s / t² (cm/s²)</th></tr></thead><tbody>`;
+    [1,2,3].forEach(n=>{const a=n===1?S.d.p2a[80]:S.d.p2b[n],tm=mean(a);o+=`<tr class="${S.books===n&&(n>1||S.target2===80)?'sel':''}"><th>${n}</th><td>${fmt(n*S.grosor,1)}</td>${cells(a,n===1?'p2a':'p2b',n===1?80:n)}${calc(tm)}${calc(160/(tm*tm),1)}</tr>`});
+    o+=`</tbody></table></div><p class="note">La fila de 1 libro copia los tiempos de 80 cm de la tabla A, como pide la ficha.</p>`;
+    if(S.calc)o+=`<h2>Gráfica velocidad–tiempo (v–t), 1 libro</h2>`+graph(pts,'tiempo, t medio (s)','velocidad, v (cm/s)','cm/s²');
+  }
+  $('resPanel').innerHTML=o;
+  $('resPanel').querySelectorAll('.del').forEach(b=>b.onclick=()=>{S.d[b.dataset.kind][b.dataset.k].splice(+b.dataset.i,1);save();renderResults();msg('Tiempo borrado.')});
+  $('copyBtn').onclick=copy;
+  let armed=false;$('clrBtn').onclick=e=>{if(!armed){armed=true;e.target.textContent='Pulsa otra vez para borrar';setTimeout(()=>{armed=false;if(e.target.isConnected)e.target.textContent=S.tab===1?'Borrar tabla':'Borrar tablas'},4000);return}
+    if(S.tab===1)MRU_S.forEach(s=>S.d.p1[s]=[]);else{MRUA_S.forEach(s=>S.d.p2a[s]=[]);S.d.p2b={2:[],3:[]}}save();renderResults();msg('Tabla vacía.')};
+}
+function copy(){
+  const row=a=>[0,1,2].map(i=>a[i]!==undefined?fmt(a[i]):'').join('\t');let t;
+  if(S.tab===1){t='s (cm)\tt1 (s)\tt2 (s)\tt3 (s)\n'+MRU_S.map(s=>s+'\t'+row(S.d.p1[s])).join('\n')}
+  else{t=`Tabla A (h = ${fmt(S.grosor,1)} cm)\ns (cm)\tt1 (s)\tt2 (s)\tt3 (s)\n`+MRUA_S.map(s=>s+'\t'+row(S.d.p2a[s])).join('\n')+'\n\nTabla B (s = 80 cm)\nLibros\th (cm)\tt1 (s)\tt2 (s)\tt3 (s)\n'+[1,2,3].map(n=>n+'\t'+fmt(n*S.grosor,1)+'\t'+row(n===1?S.d.p2a[80]:S.d.p2b[n])).join('\n')}
+  const fb=()=>{const ta=document.createElement('textarea');ta.value=t;ta.rows=8;ta.style.width='100%';$('msg').textContent='Selecciona y copia estos datos:';$('msg').appendChild(ta);ta.select()};
+  try{navigator.clipboard.writeText(t).then(()=>msg('Datos copiados. Pégalos en una hoja de cálculo.'),fb)}catch(e){fb()}
+}
+
+/* ---------- render general ---------- */
+function render(){
+  $('tab1').setAttribute('aria-selected',S.tab===1);$('tab2').setAttribute('aria-selected',S.tab===2);
+  $('objTxt').textContent=S.tab===1?'Comprueba que la velocidad es constante: cronometra desde la marca 0 hasta cada marca, 3 veces.':'Calcula la aceleración de la bola al bajar por el plano y mira cómo cambia con la inclinación.';
+  $('goBtn').textContent=S.tab===1?'Soltar coche':'Soltar bola';
+  $('goBtn').disabled=R.phase!=='ready';
+  const sb=$('swBtn');sb.classList.toggle('running',R.swOn);
+  sb.textContent=R.swOn?'Parar cronómetro':R.stopped?'Cronómetro parado':(S.tab===2?'Parar al llegar a la marca':'Iniciar cronómetro');
+  sb.disabled=S.auto||R.stopped||(S.tab===2&&!R.swOn);
+  $('noteBtn').disabled=!R.stopped;
+  $('scene').innerHTML=S.tab===1?sceneMRU():sceneMRUA();
+  draw();updLCD();renderCtrls();renderResults();
+}
+function setTab(n){S.tab=n;newRun();msg(n===1?'Pulsa «Soltar coche». Pon en marcha el cronómetro cuando la parte delantera pase por 0 cm y páralo en la marca elegida.':'Pulsa «Soltar bola»: el cronómetro arranca a la vez. Páralo cuando la bola llegue a la marca elegida.')}
+$('tab1').onclick=()=>setTab(1);$('tab2').onclick=()=>setTab(2);
+$('goBtn').onclick=go;$('noteBtn').onclick=note;$('resetBtn').onclick=()=>{newRun();msg('Intento reiniciado.')};
+const sb=$('swBtn');
+sb.addEventListener('pointerdown',e=>{e.preventDefault();toggleSW()});
+sb.addEventListener('keydown',e=>{if(e.key===' '||e.key==='Enter'){e.preventDefault();toggleSW()}});
+sb.addEventListener('keyup',e=>{if(e.key===' ')e.preventDefault()});
+$('autoChk').onchange=e=>{S.auto=e.target.checked;newRun();msg(S.auto?'Cronometraje automático: el simulador arranca y para el cronómetro con un pequeño error, como una persona.':'Cronometraje manual: tú controlas el cronómetro.')};
+$('o_calc').onchange=e=>{S.calc=e.target.checked;renderResults()};
+$('grp').onchange=e=>{S.group=e.target.value.trim();try{localStorage.setItem('cine:last',S.group)}catch(_){}load();newRun();msg(S.group?`Grupo «${S.group}» cargado.`:'Sin grupo.')};
+
+try{S.group=localStorage.getItem('cine:last')||''}catch(e){}
+$('grp').value=S.group;load();setTab(1);
+})();
+</script>
+
+</body>
+</html>
