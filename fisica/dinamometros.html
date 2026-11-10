@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Simulador de dinamómetros · Acción y reacción</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--bg:#f6f5f0;--fg:#1f2430;--card:#fff;--line:#bdb9ad;--red:#c0392b;--blue:#2563eb;--mut:#6b7280;--spring:#e7c76a}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#15171c;--fg:#eceae4;--card:#20232b;--line:#4a4f5c;--red:#ef6a5b;--blue:#6ea0ff;--mut:#9aa0ad;--spring:#8a7330}}
+:root[data-theme="dark"]{--bg:#15171c;--fg:#eceae4;--card:#20232b;--line:#4a4f5c;--red:#ef6a5b;--blue:#6ea0ff;--mut:#9aa0ad;--spring:#8a7330}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:760px;margin:0 auto;padding:16px}
+h1{font-size:1.3rem;margin:.2rem 0}
+p.s{color:var(--mut);margin:.2rem 0 1rem}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:12px}
+svg{width:100%;height:auto;display:block}
+svg text{fill:var(--fg);font-size:11px}
+.body{fill:var(--card);stroke:var(--fg);stroke-width:2}
+.tk{stroke:var(--fg);stroke-width:1}
+.row{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+label{font-weight:600}
+input[type=range]{flex:1;min-width:160px}
+select,button{font:inherit;padding:6px 10px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--fg)}
+button.p{background:var(--blue);color:#fff;border-color:var(--blue)}
+.rd{display:flex;gap:12px}
+.rd div{flex:1;text-align:center;border:2px solid var(--line);border-radius:10px;padding:8px}
+.rd b{font-size:2rem;display:block}
+.tw{overflow-x:auto}
+table{border-collapse:collapse;width:100%}
+th,td{border:1px solid var(--line);padding:5px 8px;text-align:center}
+</style>
+</head>
+<body>
+<main>
+<h1>Dinamómetros enfrentados</h1>
+<p class="s">Tira de los dinamómetros A y B unidos por una cuerda y anota las lecturas.</p>
+
+<div class="card">
+<svg viewBox="0 0 640 210" role="img" aria-label="Dos dinamómetros unidos por una cuerda">
+<defs>
+<marker id="mr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" style="fill:var(--red)"/></marker>
+<marker id="mb" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" style="fill:var(--blue)"/></marker>
+</defs>
+<rect x="60" y="80" width="170" height="44" rx="6" class="body"/>
+<rect x="410" y="80" width="170" height="44" rx="6" class="body"/>
+<rect id="sa" x="61" y="81" width="0" height="42" style="fill:var(--spring)"/>
+<rect id="sb" x="579" y="81" width="0" height="42" style="fill:var(--spring)"/>
+<g id="ticks"></g>
+<line id="pa" y1="78" y2="126" style="stroke:var(--red);stroke-width:3"/>
+<line id="pb" y1="78" y2="126" style="stroke:var(--red);stroke-width:3"/>
+<circle cx="48" cy="102" r="10" fill="none" stroke="var(--fg)" stroke-width="2"/>
+<circle cx="592" cy="102" r="10" fill="none" stroke="var(--fg)" stroke-width="2"/>
+<line x1="230" y1="102" x2="410" y2="102" stroke="var(--fg)" stroke-width="2" stroke-dasharray="5 3"/>
+<text x="145" y="145" text-anchor="middle">Dinamómetro A</text>
+<text x="495" y="145" text-anchor="middle">Dinamómetro B</text>
+<text x="320" y="96" text-anchor="middle">cuerda</text>
+<g id="wall"><rect x="614" y="70" width="14" height="64" fill="var(--line)"/><text x="621" y="148" text-anchor="middle">pared</text></g>
+<line id="ea" y1="30" y2="30" stroke="var(--blue)" stroke-width="4" marker-end="url(#mb)"/>
+<line id="eb" y1="30" y2="30" stroke="var(--blue)" stroke-width="4" marker-end="url(#mb)"/>
+<line id="ia" y1="180" y2="180" stroke="var(--red)" stroke-width="4" marker-end="url(#mr)"/>
+<line id="ib" y1="180" y2="180" stroke="var(--red)" stroke-width="4" marker-end="url(#mr)"/>
+<text x="10" y="14">Fuerzas de las manos (azul)</text>
+<text x="10" y="205">Fuerzas de la cuerda sobre cada dinamómetro (rojo)</text>
+</svg>
+</div>
+
+<div class="card">
+<div class="row" style="margin-bottom:10px">
+<label for="mode">Montaje</label>
+<select id="mode">
+<option value="2">Tiran los dos (A hacia la izquierda, B hacia la derecha)</option>
+<option value="1">Solo tira A; B está atado a la pared</option>
+</select>
+</div>
+<div class="row">
+<label for="f">Intensidad de la tirada</label>
+<input id="f" type="range" min="0" max="10" step="0.5" value="4">
+<b id="fv">4,0</b> N
+</div>
+</div>
+
+<div class="rd" style="margin-bottom:12px">
+<div class="card" style="margin:0">Lectura A<b id="ra">0,0</b>N</div>
+<div class="card" style="margin:0">Lectura B<b id="rb">0,0</b>N</div>
+</div>
+
+<div class="card">
+<div class="row" style="margin-bottom:8px">
+<button class="p" id="add">Registrar ensayo</button>
+<button id="clr">Borrar tabla</button>
+</div>
+<div class="tw"><table><thead><tr><th>Ensayo</th><th>A (N)</th><th>B (N)</th></tr></thead><tbody id="tb"></tbody></table></div>
+</div>
+
+<div class="card">
+<b>Piensa</b>
+<p style="margin:.3rem 0 0">¿Cambian las lecturas si solo tira A y B está atado a la pared? ¿Qué relación hay entre la fuerza que A ejerce sobre B y la que B ejerce sobre A?</p>
+</div>
+</main>
+
+<script>
+const $=id=>document.getElementById(id), W=170, fm=v=>v.toFixed(1).replace('.',',');
+const NS='http://www.w3.org/2000/svg';
+for(let i=0;i<=10;i++){
+  for(const [x0,dir] of [[60,1],[580,-1]]){
+    const x=x0+dir*i*W/10, l=document.createElementNS(NS,'line');
+    l.setAttribute('x1',x);l.setAttribute('x2',x);l.setAttribute('y1',i%2?112:106);l.setAttribute('y2',124);l.setAttribute('class','tk');
+    $('ticks').appendChild(l);
+    if(i%2===0){const t=document.createElementNS(NS,'text');t.setAttribute('x',x);t.setAttribute('y',100);t.setAttribute('text-anchor','middle');t.textContent=i;$('ticks').appendChild(t);}
+  }
+}
+const rows=[];
+function set(id,o){for(const k in o)$(id).setAttribute(k,o[k]);}
+function draw(){
+  const f=+$('f').value, m=$('mode').value, L=f*3.5;
+  $('fv').textContent=fm(f);$('ra').textContent=fm(f);$('rb').textContent=fm(f);
+  const xa=60+f*W/10, xb=580-f*W/10;
+  set('pa',{x1:xa,x2:xa});set('pb',{x1:xb,x2:xb});
+  set('sa',{width:xa-61});set('sb',{x:xb,width:579-xb});
+  $('wall').style.display=m==='1'?'':'none';
+  set('ea',{x1:38,x2:38-L,opacity:f?1:0});
+  set('eb',{x1:602,x2:602+L,opacity:f&&m==='2'?1:0});
+  set('ia',{x1:232,x2:232+L,opacity:f?1:0});
+  set('ib',{x1:408,x2:408-L,opacity:f?1:0});
+}
+function table(){
+  $('tb').innerHTML=rows.map((r,i)=>`<tr><td>${i+1}</td><td>${fm(r)}</td><td>${fm(r)}</td></tr>`).join('');
+}
+$('f').oninput=draw;$('mode').onchange=draw;
+$('add').onclick=()=>{rows.push(+$('f').value);table();};
+$('clr').onclick=()=>{rows.length=0;table();};
+draw();
+</script>
+</body>
+</html>
